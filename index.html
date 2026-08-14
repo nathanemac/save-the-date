@@ -19,7 +19,7 @@
   .stage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 14px;box-sizing:border-box;position:relative;overflow:hidden;}
 
   /* --- Enveloppe --- */
-  .envelope-wrap{cursor:pointer;text-align:center;user-select:none;}
+  .envelope-wrap{position:absolute;cursor:pointer;text-align:center;user-select:none;}
   .envelope{position:relative;width:300px;height:210px;margin:0 auto;perspective:1200px;}
   .envelope-body{position:absolute;inset:0;background:linear-gradient(160deg,#a9362b,#7c1512);border:1px solid #cdb079;border-radius:6px;box-shadow:0 18px 40px rgba(80,20,15,.35);overflow:hidden;}
   .envelope-body::before{content:"";position:absolute;left:0;right:0;bottom:0;height:70%;background:linear-gradient(135deg,transparent 49.4%,rgba(255,220,170,.18) 50%,transparent 50.6%),linear-gradient(-135deg,transparent 49.4%,rgba(255,220,170,.18) 50%,transparent 50.6%);}
