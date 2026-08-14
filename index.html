@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Save the date — Mariage</title>
+
+<!-- Open Graph: contrôle l'aperçu affiché quand ce lien est partagé sur WhatsApp, iMessage, etc. -->
+<meta property="og:title" content="Save the date — Mariage 10 juillet 2027">
+<meta property="og:description" content="Cliquez pour ouvrir votre invitation !">
+<meta property="og:image" content="photo.jpg">
+<meta property="og:type" content="website">
+
+<style>
+  html,body{margin:0;padding:0;background:#ede3d1;font-family:Georgia,'Times New Roman',serif;}
+  .stage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 14px;box-sizing:border-box;}
+
+  /* --- Enveloppe --- */
+  .envelope-wrap{cursor:pointer;text-align:center;user-select:none;}
+  .envelope{position:relative;width:280px;height:190px;margin:0 auto;}
+  .envelope-body{position:absolute;inset:0;background:#f6ecd8;border:1px solid #cdb079;border-radius:4px;box-shadow:0 10px 25px rgba(0,0,0,.15);}
+  .envelope-flap{position:absolute;top:0;left:0;width:100%;height:0;border-left:140px solid transparent;border-right:140px solid transparent;border-top:95px solid #e8d9b8;transform-origin:top;transition:transform .6s ease;z-index:3;}
+  .envelope-seal{position:absolute;top:70px;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:#a11f1a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#f6ecd8;font-size:20px;z-index:4;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:opacity .3s ease;}
+  .envelope-card{position:absolute;left:10px;right:10px;bottom:8px;top:40px;background:#fff;border:1px solid #cdb079;border-radius:3px;transform:translateY(0);transition:transform .6s ease .1s;z-index:2;}
+  .hint{margin-top:18px;color:#7a6650;font-style:italic;font-size:15px;letter-spacing:.02em;}
+
+  .envelope-wrap.open .envelope-flap{transform:rotateX(180deg);}
+  .envelope-wrap.open .envelope-seal{opacity:0;}
+  .envelope-wrap.open .envelope-card{transform:translateY(-130px) scale(1.02);}
+  .envelope-wrap.open{cursor:default;}
+
+  /* --- Invitation révélée --- */
+  .invitation{max-width:600px;width:100%;opacity:0;transform:translateY(20px);transition:opacity .5s ease, transform .5s ease;pointer-events:none;position:absolute;}
+  .invitation.show{opacity:1;transform:translateY(0);position:relative;pointer-events:auto;}
+
+  .card{width:100%;font-family:Georgia,'Times New Roman',serif;}
+  .frame{background:#f6ecd8;border:1px solid #cdb079;padding:9px;margin-bottom:24px;}
+  .frame img{display:block;width:100%;height:auto;border:0;border-radius:2px;}
+  .divider{text-align:center;color:#a11f1a;font-size:24px;line-height:1;letter-spacing:2px;margin-bottom:20px;}
+  .btn-row{text-align:center;margin-bottom:14px;}
+  .btn{display:inline-block;padding:16px 40px;font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:bold;letter-spacing:.16em;text-transform:uppercase;color:#fbf1e6;text-decoration:none;background:#a11f1a;border:1px solid #7c1512;border-radius:999px;}
+  .caption{text-align:center;font-style:italic;font-size:20px;color:#7a6650;margin-bottom:6px;}
+  .date{text-align:center;font-size:14px;font-weight:bold;letter-spacing:.06em;color:#4f3f30;}
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- Enveloppe cliquable -->
+  <div class="envelope-wrap" id="envelopeWrap" onclick="openEnvelope()">
+    <div class="envelope">
+      <div class="envelope-card"></div>
+      <div class="envelope-body"></div>
+      <div class="envelope-flap"></div>
+      <div class="envelope-seal">囍</div>
+    </div>
+    <div class="hint" id="hint">Cliquez pour ouvrir votre invitation</div>
+  </div>
+
+  <!-- Invitation révélée -->
+  <div class="invitation" id="invitation">
+    <div class="card">
+      <div class="frame">
+        <img src="photo.jpg" alt="Photo des mariés">
+      </div>
+      <div class="divider">囍</div>
+      <div class="btn-row">
+        <a class="btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Save+the+Date+%E2%80%94+Mariage&dates=20270710/20270711&location=Clermont-Ferrand%2C+Auvergne&details=R%C3%A9servez+la+date+%21">
+          📅&nbsp;&nbsp;Save the date
+        </a>
+      </div>
+      <div class="caption">Réservez la date&nbsp;!</div>
+      <div class="date">SAMEDI 10 JUILLET 2027 · JOURNÉE ENTIÈRE</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function openEnvelope(){
+    var wrap = document.getElementById('envelopeWrap');
+    if (wrap.classList.contains('open')) return;
+    wrap.classList.add('open');
+    document.getElementById('hint').textContent = 'Ouverture...';
+    setTimeout(function(){
+      wrap.style.display = 'none';
+      document.getElementById('invitation').classList.add('show');
+    }, 700);
+  }
+</script>
+
+</body>
+</html>
