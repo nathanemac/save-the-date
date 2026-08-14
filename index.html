@@ -11,27 +11,26 @@
 <meta property="og:image" content="https://nathanemac.github.io/save-the-date/photo.jpg">
 <meta property="og:type" content="website">
 
+<!-- GSAP : bibliothèque d'animation gratuite (MIT) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
 <style>
   html,body{margin:0;padding:0;background:#ede3d1;font-family:Georgia,'Times New Roman',serif;}
-  .stage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 14px;box-sizing:border-box;}
+  .stage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 14px;box-sizing:border-box;position:relative;overflow:hidden;}
 
   /* --- Enveloppe --- */
   .envelope-wrap{cursor:pointer;text-align:center;user-select:none;}
-  .envelope{position:relative;width:280px;height:190px;margin:0 auto;}
-  .envelope-body{position:absolute;inset:0;background:#f6ecd8;border:1px solid #cdb079;border-radius:4px;box-shadow:0 10px 25px rgba(0,0,0,.15);}
-  .envelope-flap{position:absolute;top:0;left:0;width:100%;height:0;border-left:140px solid transparent;border-right:140px solid transparent;border-top:95px solid #e8d9b8;transform-origin:top;transition:transform .6s ease;z-index:3;}
-  .envelope-seal{position:absolute;top:70px;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:#a11f1a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#f6ecd8;font-size:20px;z-index:4;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:opacity .3s ease;}
-  .envelope-card{position:absolute;left:10px;right:10px;bottom:8px;top:40px;background:#fff;border:1px solid #cdb079;border-radius:3px;transform:translateY(0);transition:transform .6s ease .1s;z-index:2;}
-  .hint{margin-top:18px;color:#7a6650;font-style:italic;font-size:15px;letter-spacing:.02em;}
-
-  .envelope-wrap.open .envelope-flap{transform:rotateX(180deg);}
-  .envelope-wrap.open .envelope-seal{opacity:0;}
-  .envelope-wrap.open .envelope-card{transform:translateY(-130px) scale(1.02);}
-  .envelope-wrap.open{cursor:default;}
+  .envelope{position:relative;width:300px;height:210px;margin:0 auto;perspective:1200px;}
+  .envelope-body{position:absolute;inset:0;background:linear-gradient(180deg,#f8efdc,#f0e2c4);border:1px solid #cdb079;border-radius:6px;box-shadow:0 18px 40px rgba(80,50,20,.25);overflow:hidden;}
+  .envelope-body::before{content:"";position:absolute;left:0;right:0;bottom:0;height:70%;background:linear-gradient(135deg,transparent 49.4%,rgba(205,176,121,.35) 50%,transparent 50.6%),linear-gradient(-135deg,transparent 49.4%,rgba(205,176,121,.35) 50%,transparent 50.6%);}
+  .envelope-flap{position:absolute;top:0;left:0;width:100%;height:105px;background:linear-gradient(160deg,#e9d9b3,#dcc79a);clip-path:polygon(0 0,100% 0,50% 92%);transform-origin:top center;transform-style:preserve-3d;box-shadow:0 6px 14px rgba(80,50,20,.12);z-index:3;}
+  .envelope-seal{position:absolute;top:78px;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:radial-gradient(circle at 35% 30%,#c94b3f,#8f1a14);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fbe9d8;font-size:21px;z-index:4;box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 1px 2px rgba(255,255,255,.25);}
+  .envelope-card{position:absolute;left:14px;right:14px;bottom:10px;top:26px;background:#fffdf8;border:1px solid #d8c49a;border-radius:4px;box-shadow:0 4px 10px rgba(0,0,0,.08);z-index:2;}
+  .hint{margin-top:20px;color:#7a6650;font-style:italic;font-size:15px;letter-spacing:.02em;}
 
   /* --- Invitation révélée --- */
-  .invitation{max-width:600px;width:100%;opacity:0;transform:translateY(20px);transition:opacity .5s ease, transform .5s ease;pointer-events:none;position:absolute;}
-  .invitation.show{opacity:1;transform:translateY(0);position:relative;pointer-events:auto;}
+  .invitation{max-width:600px;width:100%;opacity:0;pointer-events:none;position:absolute;}
+  .invitation.show{pointer-events:auto;position:relative;}
 
   .card{width:100%;font-family:Georgia,'Times New Roman',serif;}
   .frame{background:#f6ecd8;border:1px solid #cdb079;padding:9px;margin-bottom:24px;}
@@ -58,6 +57,10 @@
     <div class="hint" id="hint">Cliquez pour ouvrir votre invitation</div>
   </div>
 
+  <script>
+    var idleFloat = gsap.to('.envelope', { y: -8, duration: 1.4, ease: 'sine.inOut', repeat: -1, yoyo: true });
+  </script>
+
   <!-- Invitation révélée -->
   <div class="invitation" id="invitation">
     <div class="card">
@@ -80,13 +83,27 @@
 <script>
   function openEnvelope(){
     var wrap = document.getElementById('envelopeWrap');
-    if (wrap.classList.contains('open')) return;
-    wrap.classList.add('open');
-    document.getElementById('hint').textContent = 'Ouverture...';
-    setTimeout(function(){
-      wrap.style.display = 'none';
-      document.getElementById('invitation').classList.add('show');
-    }, 700);
+    if (wrap.dataset.open) return;
+    wrap.dataset.open = "1";
+    idleFloat.kill();
+    gsap.set('.envelope', { y: 0 });
+
+    var tl = gsap.timeline();
+
+    // le sceau se brise et disparaît
+    tl.to('.envelope-seal', { scale: 0, rotate: 25, duration: .35, ease: 'back.in(2)' });
+
+    // la pochette s'incline légèrement puis le rabat s'ouvre en 3D
+    tl.to('.envelope', { rotationX: 8, duration: .2, ease: 'power1.out' }, '-=.1');
+    tl.to('.envelope-flap', { rotationX: 180, duration: .7, ease: 'power2.inOut' }, '<');
+
+    // la carte sort de l'enveloppe
+    tl.to('.envelope-card', { y: -170, scale: 1.03, duration: .6, ease: 'power2.out' }, '-=.35');
+
+    // fondu de l'enveloppe vers l'invitation complète
+    tl.to('#hint', { opacity: 0, duration: .3 }, '-=.5');
+    tl.to('.envelope-wrap', { opacity: 0, duration: .4, onComplete: function(){ wrap.style.display = 'none'; } }, '-=.2');
+    tl.fromTo('#invitation', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: .6, ease: 'power2.out', onStart: function(){ document.getElementById('invitation').classList.add('show'); } }, '-=.2');
   }
 </script>
 
