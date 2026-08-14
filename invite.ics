@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Save the Date//Mariage 2027//FR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:save-the-date-mariage-2027@nathanemac.github.io
+DTSTAMP:20260814T000000Z
+DTSTART;VALUE=DATE:20270710
+DTEND;VALUE=DATE:20270711
+SUMMARY:Mariage XN & Nathan
+DESCRIPTION:Venez célébrer le lien qui nous unit !
+LOCATION:Château de la Batisse\, Rte de Varennes\, 63450 Chanonat\, France
+END:VEVENT
+END:VCALENDAR
