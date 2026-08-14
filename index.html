@@ -8,7 +8,7 @@
 <!-- Open Graph: contrôle l'aperçu affiché quand ce lien est partagé sur WhatsApp, iMessage, etc. -->
 <meta property="og:title" content="Save the date — Mariage 10 juillet 2027">
 <meta property="og:description" content="Ouvrez l'enveloppe pour découvrir votre invitation !">
-<meta property="og:image" content="https://nathanemac.github.io/save-the-date/photo.jpg">
+<meta property="og:image" content="https://nathanemac.github.io/save-the-date/photo.png">
 <meta property="og:type" content="website">
 
 <!-- GSAP : bibliothèque d'animation gratuite (MIT) -->
@@ -40,9 +40,16 @@
   .btn{display:inline-block;padding:16px 28px;font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:#fbf1e6;text-decoration:none;background:#a11f1a;border:1px solid #7c1512;border-radius:999px;white-space:nowrap;}
   .caption{text-align:center;font-style:italic;font-size:20px;color:#7a6650;margin-bottom:6px;}
   .date{text-align:center;font-size:14px;font-weight:bold;letter-spacing:.06em;color:#4f3f30;}
+
+  /* --- Effets : oiseaux abstraits et pétales --- */
+  .fx-layer{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden;}
+  .fx-bird{position:absolute;}
+  .petal{position:absolute;border-radius:50% 50% 50% 0;}
 </style>
 </head>
 <body>
+
+<div class="fx-layer" id="fxLayer"></div>
 
 <div class="stage">
 
@@ -65,7 +72,7 @@
   <div class="invitation" id="invitation">
     <div class="card">
       <div class="frame">
-        <img src="photo.jpg" alt="Photo des mariés">
+        <img src="photo.png" alt="Photo des mariés">
       </div>
       <div class="divider">囍</div>
       <div class="btn-row">
@@ -84,6 +91,75 @@
 </div>
 
 <script>
+  // oiseaux abstraits : silhouette minimaliste en deux traits (aile gauche / aile droite)
+  function spawnBirds(originX, originY){
+    var layer = document.getElementById('fxLayer');
+    var colors = ['#8a6a4f', '#a11f1a', '#cdb079'];
+    var flights = [
+      { x: -240, y: -300, rot: -8 },
+      { x: 10,   y: -360, rot: 0 },
+      { x: 260,  y: -280, rot: 8 }
+    ];
+    flights.forEach(function(dir, i){
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('class', 'fx-bird');
+      svg.setAttribute('width', '30');
+      svg.setAttribute('height', '18');
+      svg.setAttribute('viewBox', '0 0 34 20');
+      svg.style.left = (originX - 15) + 'px';
+      svg.style.top = (originY - 9) + 'px';
+      var color = colors[i % colors.length];
+      svg.innerHTML =
+        '<path class="wing-l" d="M17,10 C12,2 5,2 0,8" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/>' +
+        '<path class="wing-r" d="M17,10 C22,2 29,2 34,8" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/>';
+      layer.appendChild(svg);
+
+      var wingL = svg.querySelector('.wing-l');
+      var wingR = svg.querySelector('.wing-r');
+      gsap.set([wingL, wingR], { transformOrigin: '17px 10px' });
+      gsap.to(wingL, { rotation: -16, duration: .11, yoyo: true, repeat: 22, ease: 'sine.inOut' });
+      gsap.to(wingR, { rotation: 16, duration: .11, yoyo: true, repeat: 22, ease: 'sine.inOut' });
+
+      gsap.to(svg, {
+        x: dir.x, y: dir.y, rotation: dir.rot, opacity: 0,
+        duration: 2.6, delay: i * .12, ease: 'power1.in',
+        onComplete: function(){ svg.remove(); }
+      });
+    });
+  }
+
+  // pétales : quelques-uns qui tombent doucement, sans surcharger la scène
+  function spawnPetals(){
+    var layer = document.getElementById('fxLayer');
+    var colors = ['#cdb079', '#c9a06b', '#b98a86'];
+    var count = 12;
+    for (var i = 0; i < count; i++){
+      (function(i){
+        setTimeout(function(){
+          var petal = document.createElement('div');
+          petal.className = 'petal';
+          var size = 8 + Math.random() * 5;
+          petal.style.width = size + 'px';
+          petal.style.height = (size * 1.4) + 'px';
+          petal.style.left = (Math.random() * 100) + 'vw';
+          petal.style.top = '-20px';
+          petal.style.background = colors[i % colors.length];
+          petal.style.opacity = .45 + Math.random() * .25;
+          var startRot = Math.random() * 360;
+          gsap.set(petal, { rotation: startRot });
+          layer.appendChild(petal);
+
+          var duration = 5 + Math.random() * 3;
+          var drift = (Math.random() - .5) * 140;
+
+          gsap.to(petal, { y: window.innerHeight + 40, duration: duration, ease: 'none', onComplete: function(){ petal.remove(); } });
+          gsap.to(petal, { x: drift, duration: duration / 2, yoyo: true, repeat: 1, ease: 'sine.inOut' });
+          gsap.to(petal, { rotation: startRot + (Math.random() > .5 ? 320 : -320), duration: duration, ease: 'none' });
+        }, i * 350);
+      })(i);
+    }
+  }
+
   function openEnvelope(){
     var wrap = document.getElementById('envelopeWrap');
     if (wrap.dataset.open) return;
@@ -91,10 +167,13 @@
     idleFloat.kill();
     gsap.set('.envelope', { y: 0 });
 
+    var sealRect = document.querySelector('.envelope-seal').getBoundingClientRect();
+
     var tl = gsap.timeline();
 
-    // le sceau se brise et disparaît
+    // le sceau se brise et disparaît, les oiseaux s'envolent
     tl.to('.envelope-seal', { scale: 0, rotate: 25, duration: .35, ease: 'back.in(2)' });
+    tl.call(function(){ spawnBirds(sealRect.left + sealRect.width / 2, sealRect.top + sealRect.height / 2); }, null, '<');
 
     // la pochette s'incline légèrement puis le rabat s'ouvre en 3D
     tl.to('.envelope', { rotationX: 8, duration: .2, ease: 'power1.out' }, '-=.1');
@@ -107,6 +186,7 @@
     tl.to('#hint', { opacity: 0, duration: .3 }, '-=.5');
     tl.to('.envelope-wrap', { opacity: 0, duration: .4, onComplete: function(){ wrap.style.display = 'none'; } }, '-=.2');
     tl.fromTo('#invitation', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: .6, ease: 'power2.out', onStart: function(){ document.getElementById('invitation').classList.add('show'); } }, '-=.2');
+    tl.call(spawnPetals, null, '-=.3');
   }
 </script>
 
